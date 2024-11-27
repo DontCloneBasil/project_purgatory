@@ -216,7 +216,7 @@ Rigidbody2D:
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 0
@@ -285,7 +285,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 2
-  jumpForce: 13
+  jumpForce: 18
+  fallforce: 0
+  fallSpeedMax: 7
   playerheight: 2
   whatIsGround:
     serializedVersion: 2

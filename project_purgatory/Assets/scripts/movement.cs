@@ -17,8 +17,8 @@ public class movement : MonoBehaviour
     private Vector2 moveInput;
     private Vector2 moveDirection;
 
-    private float fallforce;
-    private float fallSpeedMax = 5f;
+    public float fallforce;
+    public float fallSpeedMax;
 
     [Header("GroundCheck")]
     public float playerheight;
@@ -39,7 +39,12 @@ public class movement : MonoBehaviour
 
         if(!grounded)
         {
-            
+            if (fallforce <= fallSpeedMax) fallforce += Time.deltaTime * 10;   
+            rb.AddForce(transform.up * fallforce * -1f, ForceMode2D.Force);
+        }
+        else if (grounded && fallforce != 0f)
+        {
+            fallforce = 0f;
         }
     }
 
@@ -53,8 +58,17 @@ public class movement : MonoBehaviour
     {
         //makes a new vector2 value from moveInput's x value (which is the only value we'll user for now)
         moveDirection = new Vector2(moveInput.x, 0f);
-        //applies the movement in the direction you want
-        rb.AddForce(moveDirection * moveSpeed * 10f, ForceMode2D.Force);
+        if(grounded)
+        {
+           //applies the movement in the direction you want
+            rb.AddForce(moveDirection * moveSpeed * 10f, ForceMode2D.Force);
+        }
+        else 
+        {
+            //applies the movement in the direction you want
+            rb.AddForce(moveDirection * moveSpeed * 10f * 1.5f, ForceMode2D.Force); //makes air movement 50% faster
+        }
+
     }
     //this value is called whenever the move input has changed and changes the direction the player will move too
     private void OnMove(InputValue inputValue)
