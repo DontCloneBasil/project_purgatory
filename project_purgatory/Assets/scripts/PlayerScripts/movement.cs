@@ -12,6 +12,8 @@ public class movement : MonoBehaviour
     private Rigidbody2D rb;
     public float moveSpeed;
     public float jumpForce;
+    public float jumpCharges;
+    private float jumpChargesLeft;
 
     [Header("variables")]
     private Vector2 moveInput;
@@ -44,6 +46,7 @@ public class movement : MonoBehaviour
         }
         else if (grounded && fallforce != 0f)
         {
+            if (jumpChargesLeft != jumpCharges) jumpChargesLeft = jumpCharges;
             fallforce = 0f;
         }
     }
@@ -80,8 +83,10 @@ public class movement : MonoBehaviour
     // jump funcation
     private void OnJump()
     {
-        if(grounded)
+        if(jumpChargesLeft > 0)
         {
+            jumpChargesLeft--;
+            fallforce = 0;
             rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y);
             rb.AddForce(transform.up * jumpForce, ForceMode2D.Impulse);
         }
