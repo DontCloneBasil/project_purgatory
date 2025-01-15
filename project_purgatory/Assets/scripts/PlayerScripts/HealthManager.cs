@@ -28,15 +28,20 @@ public class HealthManager : MonoBehaviour
         //collider = transform.GetComponent<Collider2D>();
         health = baseHealth * modifier; 
     }
-    private void OnTriggerEnter2D (Collider2D attackObject)
+    private void OnTriggerEnter2D(Collider2D attackObject)
     {
-        // fetches the script containing the objects attack value
-        var valueScript = attackObject.gameObject.GetComponent<AttackObjectValues>();
-        // fetches the type of damage
-        string T = valueScript.typeOfDamage;
-        // fetches the damage value
-        float DV = valueScript.DamageValue;
-        AttackCalculations(T, DV);
+        Debug.Log(attackObject.gameObject.layer);
+        if (attackObject.gameObject.layer == 6)
+        {
+            // fetches the script containing the objects attack value
+            var valueScript = attackObject.gameObject.GetComponent<AttackObjectValues>();
+            // fetches the type of damage
+            string T = valueScript.typeOfDamage;
+            // fetches the damage value
+            float DV = valueScript.DamageValue;
+            AttackCalculations(T, DV);
+
+        }
     }
     //damage calculation method
     private void AttackCalculations(string AttackType,float BaseAttack)
@@ -52,6 +57,12 @@ public class HealthManager : MonoBehaviour
                 health = Mathf.Round(health * 10.0f) * 0.1f;
                 if (health <= 0f)
                 {
+                    // if the item is a player, will move the camera object away from the player before player gets deleted
+                    if (transform.gameObject.layer == 7)
+                    {
+                        GameObject camera = transform.GetChild(0).gameObject;
+                        camera.transform.parent = null;
+                    }
                     Destroy(transform.gameObject);
                 }
                 return;
