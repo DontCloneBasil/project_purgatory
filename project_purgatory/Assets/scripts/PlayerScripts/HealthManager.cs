@@ -2,12 +2,16 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+
 
 public class HealthManager : MonoBehaviour
 {
     [Header("references")]
-    
-    [SerializeField] public List<Resistances> resistances = new List<Resistances>
+    public Slider healthSlider;
+    public bool isPlayer;
+    [SerializeField] private List<Resistances> resistances = new List<Resistances>
     {
         new Resistances("thunder", 1f),
         new Resistances("fire", 1f),
@@ -19,28 +23,50 @@ public class HealthManager : MonoBehaviour
     [Header("stats")]
     // health modifier. supposed to be dynamic on the type of map
     public float modifier;
-    public float baseHealth;
+    [SerializeField] private float baseHealth;
     [SerializeField] private float health;
-    
+
     // Start is called before the first frame update
     void Start()
     {
+        health = baseHealth * modifier;
+
         //collider = transform.GetComponent<Collider2D>();
-        health = baseHealth * modifier; 
+        if (transform.gameObject.layer == 7)
+        {
+            isPlayer = true;
+            healthSlider.maxValue = health;
+        }
+
+    }
+
+    void Update()
+    {
+        if(isPlayer)
+        {
+           if (healthSlider.value != health)
+           {
+                healthSlider.value = health;
+           }
+        }
+        
     }
     private void OnTriggerEnter2D(Collider2D attackObject)
     {
-        Debug.Log(attackObject.gameObject.layer);
         if (attackObject.gameObject.layer == 6)
         {
+            Debug.Log($"attacking object:{attackObject.gameObject.name} attacks: {transform.gameObject.name}");
             // fetches the script containing the objects attack value
             var valueScript = attackObject.gameObject.GetComponent<AttackObjectValues>();
             // fetches the type of damage
             string T = valueScript.typeOfDamage;
             // fetches the damage value
             float DV = valueScript.DamageValue;
-            AttackCalculations(T, DV);
-
+            //checks if the hit object is or isn't the caster, at which point it doesn't do the damage calculation
+            if(valueScript.caster.name != transform.gameObject.name)
+            {
+                AttackCalculations(T, DV);
+            }
         }
     }
     //damage calculation method
@@ -58,16 +84,22 @@ public class HealthManager : MonoBehaviour
                 if (health <= 0f)
                 {
                     // if the item is a player, will move the camera object away from the player before player gets deleted
-                    if (transform.gameObject.layer == 7)
+                    if (isPlayer)
                     {
                         GameObject camera = transform.GetChild(0).gameObject;
                         camera.transform.parent = null;
+                        BackToStart();
+                        
                     }
                     Destroy(transform.gameObject);
                 }
                 return;
             }
         }
+    }
+    private void BackToStart()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex - 1);
     }
 
 

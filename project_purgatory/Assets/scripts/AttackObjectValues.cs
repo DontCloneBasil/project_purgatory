@@ -6,6 +6,7 @@ public class AttackObjectValues : MonoBehaviour
 {
     public string typeOfDamage;
     public float DamageValue;
+    public GameObject caster;
     
     void Start()
     {

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -17,9 +18,15 @@ public class movement : MonoBehaviour
     [Header("variables")]
     private Vector2 moveInput;
     private Vector2 moveDirection;
-
     public float fallforce;
     public float fallSpeedMax;
+
+    [Header("slamAttack")]
+    [SerializeField] private Vector3 spawnLocation;
+    public GameObject Slam;
+    private bool Attacking;
+    public float maxFallDMGMultiplier;
+    private float fallDMGMultiplier;
 
     [Header("GroundCheck")]
     public float playerheight;
@@ -54,6 +61,18 @@ public class movement : MonoBehaviour
     void FixedUpdate()
     {
         MovePlayer();
+        if (grounded && Attacking)
+        {
+            StartAttack();
+        }
+        else if (Attacking && fallDMGMultiplier < maxFallDMGMultiplier)
+        {
+            fallDMGMultiplier += Time.deltaTime * 2;
+        }
+        else if (fallDMGMultiplier >= maxFallDMGMultiplier)
+        {
+            fallDMGMultiplier = maxFallDMGMultiplier;
+        }
     }
     //this function is user to use the player direction to actually move the player
     private void MovePlayer()
@@ -89,5 +108,36 @@ public class movement : MonoBehaviour
             rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y);
             rb.AddForce(transform.up * jumpForce, ForceMode2D.Impulse);
         }
+    }
+
+    private void OnAttack()
+    {
+        if (!grounded)
+        {
+            rb.velocity = new Vector2(0, 0);
+            rb.AddForce(transform.up * jumpForce * -2, ForceMode2D.Impulse);
+        }
+        Attacking = true;   
+    }
+
+    private void StartAttack()
+    {
+        Attacking = false;
+        //spawns the object below the player
+        GameObject attackObject = Instantiate(Slam, new Vector3(transform.localPosition.x,transform.localPosition.y-.7f, transform.localPosition.z), quaternion.identity);
+        //gets the objects attack value script
+        AttackObjectValues attackValues = attackObject.GetComponent<AttackObjectValues>();
+
+        attackValues.caster = transform.gameObject;
+        attackValues.typeOfDamage = attackObject.tag.ToString();
+        //increases the damage value based on the time falling
+        attackValues.DamageValue *= (1f + fallDMGMultiplier);
+
+        Vector3 newscale = attackObject.transform.localScale;
+        newscale.x *= (1f + fallDMGMultiplier); 
+        attackObject.transform.localScale = newscale;
+        
+        Destroy(attackObject, 1f);
+        fallDMGMultiplier = 0f;
     }
 }
